@@ -28,7 +28,7 @@ EVENEMENTS = [
     "parot invation",
     "rick roll",
     "kiss",
-    "how train dragon"
+    "how train dragon",
     "shrek surprise"
 ]
 
