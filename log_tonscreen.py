@@ -15,6 +15,7 @@ pour une probabilité égale entre tous les événements.
 import math
 import random
 import tkinter as tk
+import subprocess
 from tkinter import messagebox
 
 # ---------------------------------------------------------------------
@@ -28,10 +29,26 @@ EVENEMENTS = [
     "parot invation",
     "rick roll",
     "kiss",
-    "how train dragon",
-    "shrek surprise"
+    "how train dragon" "shrek surprise",
 ]
-
+COMMANDES = {
+    "do a barel roll": "PARROT",
+    "log ton screen": "PARROT",
+    "une beau fond d'ecrant": "PARROT",
+    "F14": "PARROT",
+    "parot invation": "PARROT",
+    "rick roll": "PARROT",
+    "kiss": "PARROT",
+    "how train dragon": "PARROT",
+    "shrek surprise": "PARROT",
+}
+TERMINAUX_LINUX = [
+    ["gnome-terminal", "--"],
+    ["konsole", "-e"],
+    ["xfce4-terminal", "-e"],
+    ["xterm", "-e"],
+    ["x-terminal-emulator", "-e"],
+]
 # Mets des nombres ici pour pondérer (ex: [3, 1, 1, 2, 1, 1, 1, 0.5])
 # ou laisse None pour un tirage équiprobable.
 POIDS = None
@@ -215,7 +232,48 @@ class RoueApp:
         self.bouton.config(state="normal")
         resultat = EVENEMENTS[self.index_gagnant]
         self.label_resultat.config(text=f"Résultat : {resultat}")
+        self.executer_commande(resultat)
         messagebox.showinfo("Résultat", f"La roue s'est arrêtée sur :\n\n{resultat}")
+
+    def make_result(self):
+        match (self.resultat):
+            case "log ton screen":
+                pass
+
+    def _lancer_dans_terminal(self, commande_interne):
+        """Ouvre un terminal visible et y exécute commande_interne (ex: curl parrot.live).
+        Essaie plusieurs émulateurs de terminal jusqu'à en trouver un d'installé."""
+        for prefixe_terminal in TERMINAUX_LINUX:
+            try:
+                subprocess.Popen(prefixe_terminal + commande_interne)
+                return  # succès, on s'arrête là
+            except FileNotFoundError:
+                continue  # ce terminal n'est pas installé, on essaie le suivant
+
+        messagebox.showerror(
+            "Aucun terminal trouvé",
+            "Impossible de trouver un émulateur de terminal installé "
+            "(gnome-terminal, konsole, xfce4-terminal, xterm...).\n"
+            "Ajoute le tien dans la liste TERMINAUX_LINUX.",
+        )
+
+    def executer_commande(self, resultat):
+        """Lance la commande système associée au résultat, sans bloquer l'interface."""
+        commande = COMMANDES.get(resultat)
+        if not commande:
+            return  # rien de configuré pour cet événement
+        if commande == "PARROT":
+            self._lancer_dans_terminal(["curl", "parrot.live"])
+            return
+        try:
+            # Popen (et non run) => ne bloque pas la fenêtre tkinter en attendant
+            # que la commande se termine.
+            subprocess.Popen(commande)
+        except (FileNotFoundError, OSError) as e:
+            messagebox.showerror(
+                "Erreur de commande",
+                f"Impossible d'exécuter la commande pour '{resultat}' :\n{commande}\n\n{e}",
+            )
 
 
 if __name__ == "__main__":
