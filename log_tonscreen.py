@@ -32,15 +32,15 @@ EVENEMENTS = [
     "how train dragon" "shrek surprise",
 ]
 COMMANDES = {
-    "do a barel roll": "PARROT",
-    "log ton screen": "PARROT",
-    "une beau fond d'ecrant": "PARROT",
-    "F14": "PARROT",
+    "do a barel roll": "rick",
+    "lock ton screen": "lock",
+    "une beau fond d'ecrant": "rick",
+    "F14": "f14",
     "parot invation": "PARROT",
-    "rick roll": "PARROT",
-    "kiss": "PARROT",
-    "how train dragon": "PARROT",
-    "shrek surprise": "PARROT",
+    "rick roll": "rick",
+    "kiss": "rick",
+    "how train dragon": "rick",
+    "shrek surprise": "rick",
 }
 TERMINAUX_LINUX = [
     ["gnome-terminal", "--"],
@@ -235,11 +235,6 @@ class RoueApp:
         self.executer_commande(resultat)
         messagebox.showinfo("Résultat", f"La roue s'est arrêtée sur :\n\n{resultat}")
 
-    def make_result(self):
-        match (self.resultat):
-            case "log ton screen":
-                pass
-
     def _lancer_dans_terminal(self, commande_interne):
         """Ouvre un terminal visible et y exécute commande_interne (ex: curl parrot.live).
         Essaie plusieurs émulateurs de terminal jusqu'à en trouver un d'installé."""
@@ -263,7 +258,19 @@ class RoueApp:
         if not commande:
             return  # rien de configuré pour cet événement
         if commande == "PARROT":
-            self._lancer_dans_terminal(["curl", "parrot.live"])
+            for _ in range(10):
+                self._lancer_dans_terminal(["curl", "parrot.live"])
+            return
+        if commande == "lock":
+            for _ in range(20):
+                self._lancer_dans_terminal(["yes", "lock ton screen"])
+            return
+        if commande == "f14":
+            self._lancer_dans_terminal(["ft_lock", ""])
+            return
+        if commande == "rick":
+            for _ in range(10):
+                self._lancer_dans_terminal(["curl", "ascii.live/rick"])
             return
         try:
             # Popen (et non run) => ne bloque pas la fenêtre tkinter en attendant
@@ -271,8 +278,8 @@ class RoueApp:
             subprocess.Popen(commande)
         except (FileNotFoundError, OSError) as e:
             messagebox.showerror(
-                "Erreur de commande",
-                f"Impossible d'exécuter la commande pour '{resultat}' :\n{commande}\n\n{e}",
+                "bruh",
+                f"caca '{resultat}' :\n{commande}\n\n{e}",
             )
 
 
