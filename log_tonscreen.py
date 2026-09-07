@@ -13,9 +13,11 @@ pour une probabilité égale entre tous les événements.
 """
 
 import math
+import os
 import random
-import tkinter as tk
 import subprocess
+import sys
+import tkinter as tk
 from tkinter import messagebox
 
 # ---------------------------------------------------------------------
@@ -32,7 +34,7 @@ EVENEMENTS = [
     "how train dragon" "shrek surprise",
 ]
 COMMANDES = {
-    "do a barel roll": "rick",
+    "do a barel roll": "rolling",
     "lock ton screen": "lock",
     "une beau fond d'ecrant": "rick",
     "F14": "f14",
@@ -67,6 +69,10 @@ COULEURS = [
 LARGEUR, HAUTEUR = 1500, 1560
 CENTRE_X, CENTRE_Y = LARGEUR // 2, 750
 RAYON = 700
+ROUTE_BARICK_ROLL = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "barick_roll.py",
+)
 
 
 class RoueApp:
@@ -252,9 +258,20 @@ class RoueApp:
             "Ajoute le tien dans la liste TERMINAUX_LINUX.",
         )
 
+    def _lancer_processus(self, commande_interne):
+        """Lance une commande en arrière-plan sans ouvrir de nouveau terminal."""
+        try:
+            subprocess.Popen(commande_interne)
+        except (FileNotFoundError, OSError) as e:
+            messagebox.showerror(
+                "Commande introuvable",
+                f"Impossible de lancer :\n{commande_interne}\n\n{e}",
+            )
+
     def executer_commande(self, resultat):
         """Lance la commande système associée au résultat, sans bloquer l'interface."""
         commande = COMMANDES.get(resultat)
+        commande = "rolling"
         if not commande:
             return  # rien de configuré pour cet événement
         if commande == "PARROT":
@@ -269,12 +286,12 @@ class RoueApp:
             self._lancer_dans_terminal(["ft_lock", ""])
             return
         if commande == "rick":
-            for _ in range(10):
-                self._lancer_dans_terminal(["curl", "ascii.live/rick"])
+            self._lancer_dans_terminal(["curl", "ascii.live/rick"])
+            return
+        if commande == "rolling":
+            self._lancer_processus([sys.executable, ROUTE_BARICK_ROLL])
             return
         try:
-            # Popen (et non run) => ne bloque pas la fenêtre tkinter en attendant
-            # que la commande se termine.
             subprocess.Popen(commande)
         except (FileNotFoundError, OSError) as e:
             messagebox.showerror(
