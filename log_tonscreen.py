@@ -25,24 +25,21 @@ from tkinter import messagebox
 # ---------------------------------------------------------------------
 EVENEMENTS = [
     "do a barel roll",
-    "log ton screen",
+    "lock ton screen",
     "une beau fond d'ecrant",
     "F14",
     "parot invation",
     "rick roll",
     "kiss",
-    "how train dragon" "shrek surprise",
 ]
 COMMANDES = {
     "do a barel roll": "rolling",
     "lock ton screen": "lock",
-    "une beau fond d'ecrant": "rick",
+    "une beau fond d'ecrant": "backround",
     "F14": "f14",
     "parot invation": "PARROT",
     "rick roll": "rick",
-    "kiss": "rick",
-    "how train dragon": "rick",
-    "shrek surprise": "rick",
+    "kiss": "kiss",
 }
 TERMINAUX_LINUX = [
     ["gnome-terminal", "--"],
@@ -73,13 +70,22 @@ ROUTE_BARICK_ROLL = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "barick_roll.py",
 )
+ROUTE_BACKROUND = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "backround.py",
+)
 
+ROUTE_ANIMATE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "animate.py",
+)
 
 class RoueApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Roue des événements")
         self.root.resizable(False, False)
+        self.root.after(1000, self.lancer_rotation)
 
         self.angle = 0.0  # angle actuel de la roue (degrés)
         self.vitesse = 0.0  # vitesse de rotation (degrés / frame)
@@ -271,7 +277,6 @@ class RoueApp:
     def executer_commande(self, resultat):
         """Lance la commande système associée au résultat, sans bloquer l'interface."""
         commande = COMMANDES.get(resultat)
-        commande = "rolling"
         if not commande:
             return  # rien de configuré pour cet événement
         if commande == "PARROT":
@@ -290,6 +295,13 @@ class RoueApp:
             return
         if commande == "rolling":
             self._lancer_processus([sys.executable, ROUTE_BARICK_ROLL])
+            return
+        if commande == "backround":
+            self._lancer_processus([sys.executable, ROUTE_BACKROUND])
+            return
+        if commande == "kiss":
+            for _ in range(10):
+                self._lancer_dans_terminal([sys.executable, ROUTE_ANIMATE])
             return
         try:
             subprocess.Popen(commande)

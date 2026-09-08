@@ -1,5 +1,5 @@
 PYTHON = python3
-FILE = log_tonscreen.py
+FILE = main.py
 ENV_DIR = .env
 ENV_PYTHON = $(ENV_DIR)/bin/python
 ENV_PIP = $(ENV_DIR)/bin/pip
