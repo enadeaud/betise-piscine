@@ -2,7 +2,6 @@
 
 import time
 import sys
-import subprocess
 
 
 kitty_frames = [
@@ -116,6 +115,7 @@ def animate(frames: list[str] = kitty_frames, delay: float = 0.12) -> None:
             color_index += 1
             time.sleep(delay)
             x += 1
+
 
 if __name__ == "__main__":
     animate()
