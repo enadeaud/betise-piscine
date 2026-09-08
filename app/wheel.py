@@ -13,7 +13,6 @@ pour une probabilité égale entre tous les événements.
 """
 
 import math
-import os
 import random
 import subprocess
 import sys
@@ -35,7 +34,7 @@ EVENEMENTS = [
 COMMANDES = {
     "do a barel roll": "rolling",
     "lock ton screen": "lock",
-    "une beau fond d'ecrant": "backround",
+    "une beau fond d'ecrant": "background",
     "F14": "f14",
     "parot invation": "PARROT",
     "rick roll": "rick",
@@ -66,19 +65,10 @@ COULEURS = [
 LARGEUR, HAUTEUR = 1500, 1560
 CENTRE_X, CENTRE_Y = LARGEUR // 2, 750
 RAYON = 700
-ROUTE_BARICK_ROLL = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "barick_roll.py",
-)
-ROUTE_BACKROUND = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "backround.py",
-)
+MODULE_ROTATION = "app.effects.display_rotation"
+MODULE_BACKGROUND = "app.effects.background"
+MODULE_ANIMATION = "app.effects.animation"
 
-ROUTE_ANIMATE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "animate.py",
-)
 
 class RoueApp:
     def __init__(self, root):
@@ -95,11 +85,17 @@ class RoueApp:
         n = len(EVENEMENTS)
         self.poids = POIDS if POIDS else [1] * n
         if len(self.poids) != n:
-            raise ValueError("POIDS doit avoir la même longueur que EVENEMENTS")
+            raise ValueError(
+                "POIDS doit avoir la même longueur que EVENEMENTS"
+            )
 
         # --- Interface ---
         self.canvas = tk.Canvas(
-            root, width=LARGEUR, height=HAUTEUR, bg="#f5f5f5", highlightthickness=0
+            root,
+            width=LARGEUR,
+            height=HAUTEUR,
+            bg="#f5f5f5",
+            highlightthickness=0,
         )
         self.canvas.pack()
 
@@ -163,9 +159,7 @@ class RoueApp:
                 fill="white",
                 font=("Helvetica", 10, "bold"),
                 tags="roue",
-                angle=(
-                    -angle_texte_deg + 90 if False else 0
-                ),  # texte horizontal, plus lisible
+                angle=0,
             )
 
         # Moyeu central
@@ -207,10 +201,12 @@ class RoueApp:
         index_gagnant = random.choices(range(n), weights=self.poids, k=1)[0]
         angle_par_secteur = 360 / n
 
-        # 2. Calculer l'angle final pour que ce secteur s'arrête sous la flèche (en haut, 90°)
+        # 2. Calculer l'angle final pour arrêter le secteur sous la flèche.
         # Le secteur i est dessiné de (angle + i*sect) à (angle + (i+1)*sect)
-        # On veut que le milieu du secteur gagnant tombe à 90° (position de la flèche)
-        milieu_secteur = index_gagnant * angle_par_secteur + angle_par_secteur / 2
+        # Le milieu du secteur gagnant doit tomber à 90 degrés.
+        milieu_secteur = (
+            index_gagnant * angle_par_secteur + angle_par_secteur / 2
+        )
         tours_supplementaires = (
             random.randint(4, 7) * 360
         )  # plusieurs tours pour l'effet
@@ -231,7 +227,7 @@ class RoueApp:
             self._fin_rotation()
             return
 
-        # Vitesse proportionnelle à la distance restante (effet de ralentissement)
+        # La vitesse diminue proportionnellement à la distance restante.
         pas = max(2, distance_restante * 0.04)
         self.angle += pas
         self.dessiner_roue()
@@ -245,17 +241,19 @@ class RoueApp:
         resultat = EVENEMENTS[self.index_gagnant]
         self.label_resultat.config(text=f"Résultat : {resultat}")
         self.executer_commande(resultat)
-        messagebox.showinfo("Résultat", f"La roue s'est arrêtée sur :\n\n{resultat}")
+        messagebox.showinfo(
+            "Résultat",
+            f"La roue s'est arrêtée sur :\n\n{resultat}",
+        )
 
     def _lancer_dans_terminal(self, commande_interne):
-        """Ouvre un terminal visible et y exécute commande_interne (ex: curl parrot.live).
-        Essaie plusieurs émulateurs de terminal jusqu'à en trouver un d'installé."""
+        """Ouvre un terminal et exécute la commande fournie."""
         for prefixe_terminal in TERMINAUX_LINUX:
             try:
                 subprocess.Popen(prefixe_terminal + commande_interne)
-                return  # succès, on s'arrête là
+                return
             except FileNotFoundError:
-                continue  # ce terminal n'est pas installé, on essaie le suivant
+                continue
 
         messagebox.showerror(
             "Aucun terminal trouvé",
@@ -265,7 +263,7 @@ class RoueApp:
         )
 
     def _lancer_processus(self, commande_interne):
-        """Lance une commande en arrière-plan sans ouvrir de nouveau terminal."""
+        """Lance une commande en arrière-plan."""
         try:
             subprocess.Popen(commande_interne)
         except (FileNotFoundError, OSError) as e:
@@ -274,18 +272,23 @@ class RoueApp:
                 f"Impossible de lancer :\n{commande_interne}\n\n{e}",
             )
 
+    def _lancer_module(self, nom_module):
+        self._lancer_processus([sys.executable, "-m", nom_module])
+
+    def _lancer_plusieurs_fois(self, commande_interne, repetitions):
+        for _ in range(repetitions):
+            self._lancer_dans_terminal(commande_interne)
+
     def executer_commande(self, resultat):
-        """Lance la commande système associée au résultat, sans bloquer l'interface."""
+        """Lance la commande associée au résultat sans bloquer l'interface."""
         commande = COMMANDES.get(resultat)
         if not commande:
-            return  # rien de configuré pour cet événement
+            return
         if commande == "PARROT":
-            for _ in range(10):
-                self._lancer_dans_terminal(["curl", "parrot.live"])
+            self._lancer_plusieurs_fois(["curl", "parrot.live"], 10)
             return
         if commande == "lock":
-            for _ in range(20):
-                self._lancer_dans_terminal(["yes", "lock ton screen"])
+            self._lancer_plusieurs_fois(["yes", "lock ton screen"], 20)
             return
         if commande == "f14":
             self._lancer_dans_terminal(["ft_lock", ""])
@@ -294,14 +297,16 @@ class RoueApp:
             self._lancer_dans_terminal(["curl", "ascii.live/rick"])
             return
         if commande == "rolling":
-            self._lancer_processus([sys.executable, ROUTE_BARICK_ROLL])
+            self._lancer_module(MODULE_ROTATION)
             return
-        if commande == "backround":
-            self._lancer_processus([sys.executable, ROUTE_BACKROUND])
+        if commande == "background":
+            self._lancer_module(MODULE_BACKGROUND)
             return
         if commande == "kiss":
-            for _ in range(10):
-                self._lancer_dans_terminal([sys.executable, ROUTE_ANIMATE])
+            self._lancer_plusieurs_fois(
+                [sys.executable, "-m", MODULE_ANIMATION],
+                10,
+            )
             return
         try:
             subprocess.Popen(commande)

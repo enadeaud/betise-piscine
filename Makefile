@@ -1,5 +1,5 @@
 PYTHON = python3
-FILE = main.py
+MODULE = app.main
 ENV_DIR = .env
 ENV_PYTHON = $(ENV_DIR)/bin/python
 ENV_PIP = $(ENV_DIR)/bin/pip
@@ -8,10 +8,13 @@ LOCK_CMD_DIR = $(HOME)/.local/bin
 LOCK_CMD = $(LOCK_CMD_DIR)/lock
 PIP_DEPS = pynput
 
-LOCK_ALIAS = alias lock='cd $(CURDIR) && $(ENV_PYTHON) main.py'
+LOCK_ALIAS = alias lock='cd $(CURDIR) && $(ENV_PYTHON) -m $(MODULE)'
 
-run: setup-env check-tkinter setup-lock
-	$(ENV_PYTHON) $(FILE)
+run: pull setup-env check-tkinter setup-lock
+	$(ENV_PYTHON) -m $(MODULE)
+
+pull:
+	git pull --ff-only
 
 setup-env:
 	@if [ ! -d "$(ENV_DIR)" ]; then \
@@ -36,7 +39,7 @@ setup-lock:
 		touch "$(ZSHRC)"; \
 	fi
 	@mkdir -p "$(LOCK_CMD_DIR)"
-	@printf '%s\n' '#!/usr/bin/env sh' 'cd "$(CURDIR)" || exit 1' 'exec "$(CURDIR)/$(ENV_PYTHON)" "$(CURDIR)/main.py" "$$@"' > "$(LOCK_CMD)"
+	@printf '%s\n' '#!/usr/bin/env sh' 'cd "$(CURDIR)" || exit 1' 'exec "$(CURDIR)/$(ENV_PYTHON)" -m $(MODULE) "$$@"' > "$(LOCK_CMD)"
 	@chmod +x "$(LOCK_CMD)"
 	@sed -i "/^alias lock=/d" "$(ZSHRC)"
 	@echo "$(LOCK_ALIAS)" >> "$(ZSHRC)"
@@ -48,4 +51,4 @@ clean:
 	@find . -name "*.pyc" -delete
 	@find . -name "*.pyo" -delete
 	@find . -name "__pycache__" -delete
-.PHONY: run setup-env check-tkinter setup-lock clean
+.PHONY: run pull setup-env check-tkinter setup-lock clean

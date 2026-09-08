@@ -1,26 +1,19 @@
-import os
 import subprocess
 import sys
 
 from pynput import keyboard
 
-ROUTE_DE_LA_ROUE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "log_tonscreen.py",
-)
-processus_roue = None
 roue_deja_lancee = False
 
 
 def lancer_programme():
-    global processus_roue
     global roue_deja_lancee
 
     if roue_deja_lancee:
         return
 
     print("Touche détectée : lancement de la roue")
-    processus_roue = subprocess.Popen([sys.executable, ROUTE_DE_LA_ROUE])
+    subprocess.Popen([sys.executable, "-m", "app.wheel"])
     roue_deja_lancee = True
 
 

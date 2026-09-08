@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import subprocess
 import time
@@ -7,7 +8,7 @@ TOTAL_DURATION = 120  # 2 minutes en secondes
 INTERVAL = 10  # Intervalle de 10 secondes
 
 
-class barick:
+class DisplayRotator:
     @staticmethod
     def _outputs_wlr_randr():
         try:
@@ -35,7 +36,7 @@ class barick:
 
     @staticmethod
     def _set_rotation_wayland(mode):
-        outputs = barick._outputs_wlr_randr()
+        outputs = DisplayRotator._outputs_wlr_randr()
         if not outputs:
             raise RuntimeError(
                 "Aucun output Wayland detecte via wlr-randr."
@@ -48,7 +49,10 @@ class barick:
 
     @staticmethod
     def _set_rotation_sway(mode):
-        subprocess.run(["swaymsg", "output", "*", "transform", mode], check=True)
+        subprocess.run(
+            ["swaymsg", "output", "*", "transform", mode],
+            check=True,
+        )
 
     @staticmethod
     def _set_rotation_hypr(mode):
@@ -62,11 +66,11 @@ class barick:
         )
         monitors = []
         try:
-            import json
-
             monitors = json.loads(result.stdout)
         except Exception as e:
-            raise RuntimeError("Impossible de lire la liste des moniteurs Hyprland") from e
+            raise RuntimeError(
+                "Impossible de lire la liste des moniteurs Hyprland"
+            ) from e
 
         if not monitors:
             raise RuntimeError("Aucun moniteur detecte par hyprctl")
@@ -76,28 +80,43 @@ class barick:
             if not name:
                 continue
             subprocess.run(
-                ["hyprctl", "keyword", "monitor", f"{name},preferred,auto,1,transform,{hypr_mode}"],
+                [
+                    "hyprctl",
+                    "keyword",
+                    "monitor",
+                    f"{name},preferred,auto,1,transform,{hypr_mode}",
+                ],
                 check=True,
             )
 
     @staticmethod
     def roll():
-        elapsed = 0  # Compteur de temps passe
+        elapsed = 0  # Compteur de temps passe 
         session_type = os.environ.get("XDG_SESSION_TYPE", "").lower()
         wayland_backend = None
         if session_type == "wayland":
             if shutil.which("wlr-randr"):
-                wayland_backend = barick._set_rotation_wayland
+                wayland_backend = DisplayRotator._set_rotation_wayland
             elif shutil.which("swaymsg"):
-                wayland_backend = barick._set_rotation_sway
+                wayland_backend = DisplayRotator._set_rotation_sway
             elif shutil.which("hyprctl"):
-                wayland_backend = barick._set_rotation_hypr
+                wayland_backend = DisplayRotator._set_rotation_hypr
             else:
-                print("\nErreur : session Wayland detectee, aucun backend de rotation trouve.")
-                print("Installe wlr-randr, ou utilise Sway/Hyprland, ou passe en Xorg.")
+                print(
+                    "\nErreur : session Wayland detectee, aucun backend "
+                    "de rotation trouve."
+                )
+                print(
+                    "Installe wlr-randr, ou utilise Sway/Hyprland, "
+                    "ou passe en Xorg."
+                )
                 return
 
-        set_rotation = wayland_backend if wayland_backend else barick._set_rotation_x11
+        set_rotation = (
+            wayland_backend
+            if wayland_backend
+            else DisplayRotator._set_rotation_x11
+        )
         inverted_mode = "180" if session_type == "wayland" else "inverted"
         normal_mode = "normal"
 
@@ -110,13 +129,19 @@ class barick:
                 # 2. Remet l'écran à la normale
                 set_rotation(normal_mode)
                 time.sleep(INTERVAL)
-                # Chaque cycle complet prend 20 secondes (10s retourné + 10s normal)
+                # Chaque cycle complet prend 20 secondes.
                 elapsed += (INTERVAL * 2)
 
         except subprocess.CalledProcessError:
             if session_type == "wayland":
-                print("\nErreur : echec de la rotation sur Wayland avec le backend detecte.")
-                print("GNOME/KDE Wayland bloquent souvent cette action par securite.")
+                print(
+                    "\nErreur : echec de la rotation sur Wayland "
+                    "avec le backend detecte."
+                )
+                print(
+                    "GNOME/KDE Wayland bloquent souvent cette action "
+                    "par securite."
+                )
             else:
                 print("\nErreur : Impossible d'utiliser xrandr.")
                 print("Verifie que tu es bien sur une session graphique Xorg.")
@@ -125,7 +150,7 @@ class barick:
         except KeyboardInterrupt:
             print("\nScript interrompu par l'utilisateur.")
         finally:
-            # Sécurité : On s'assure que l'écran revient TOUJOURS à la normale à la fin
+            # Remettre l'écran à l'endroit, même en cas d'erreur.
             try:
                 set_rotation(normal_mode)
             except (subprocess.CalledProcessError, RuntimeError):
@@ -134,4 +159,4 @@ class barick:
 
 
 if __name__ == "__main__":
-    barick.roll()
+    DisplayRotator.roll()
