@@ -30,6 +30,7 @@ EVENEMENTS = [
     "parot invation",
     "rick roll",
     "kiss",
+    "shrek"
 ]
 COMMANDES = {
     "do a barel roll": "rolling",
@@ -39,6 +40,7 @@ COMMANDES = {
     "parot invation": "PARROT",
     "rick roll": "rick",
     "kiss": "kiss",
+    "shrek": "shrek"
 }
 TERMINAUX_LINUX = [
     ["gnome-terminal", "--"],
@@ -282,6 +284,7 @@ class RoueApp:
     def executer_commande(self, resultat):
         """Lance la commande associée au résultat sans bloquer l'interface."""
         commande = COMMANDES.get(resultat)
+        commande = "shrek"
         if not commande:
             return
         if commande == "PARROT":
@@ -292,6 +295,9 @@ class RoueApp:
             return
         if commande == "f14":
             self._lancer_dans_terminal(["ft_lock", ""])
+            return
+        if commande == "shrek":
+            self._lancer_plusieurs_fois(["python3", "shrek.py"], 1)
             return
         if commande == "rick":
             self._lancer_dans_terminal(["curl", "ascii.live/rick"])
@@ -321,3 +327,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = RoueApp(root)
     root.mainloop()
+ 

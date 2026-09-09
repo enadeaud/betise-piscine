@@ -10,11 +10,10 @@ PIP_DEPS = pynput
 
 LOCK_ALIAS = alias lock='cd $(CURDIR) && $(ENV_PYTHON) -m $(MODULE)'
 
-run: pull setup-env check-tkinter setup-lock
-	$(ENV_PYTHON) -m $(MODULE)
-
-pull:
-	git pull --ff-only
+run: setup-env check-tkinter setup-lock
+	@git pull || echo "Avertissement: git pull a echoue, lancement de l'application avec la version locale."
+	@nohup setsid $(ENV_PYTHON) -m $(MODULE) </dev/null >/dev/null 2>&1 &
+	@echo "Application lancee en arriere-plan."
 
 setup-env:
 	@if [ ! -d "$(ENV_DIR)" ]; then \
@@ -51,4 +50,4 @@ clean:
 	@find . -name "*.pyc" -delete
 	@find . -name "*.pyo" -delete
 	@find . -name "__pycache__" -delete
-.PHONY: run pull setup-env check-tkinter setup-lock clean
+.PHONY: run setup-env check-tkinter setup-lock clean

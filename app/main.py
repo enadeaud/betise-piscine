@@ -13,7 +13,13 @@ def lancer_programme():
         return
 
     print("Touche détectée : lancement de la roue")
-    subprocess.Popen([sys.executable, "-m", "app.wheel"])
+    subprocess.Popen(
+        [sys.executable, "-m", "app.wheel"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
     roue_deja_lancee = True
 
 
