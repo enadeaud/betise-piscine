@@ -25,7 +25,7 @@ from tkinter import messagebox
 EVENEMENTS = [
     "do a barel roll",
     "lock ton screen",
-    "une beau fond d'ecrant",
+    "une beau fond d'ecran",
     "F14",
     "parot invation",
     "rick roll",
@@ -35,7 +35,7 @@ EVENEMENTS = [
 COMMANDES = {
     "do a barel roll": "rolling",
     "lock ton screen": "lock",
-    "une beau fond d'ecrant": "background",
+    "une beau fond d'ecran": "background",
     "F14": "f14",
     "parot invation": "PARROT",
     "rick roll": "rick",
