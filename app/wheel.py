@@ -30,7 +30,7 @@ EVENEMENTS = [
     "parot invation",
     "rick roll",
     "kiss",
-    "shrek"
+    "shrek",
 ]
 COMMANDES = {
     "do a barel roll": "rolling",
@@ -40,7 +40,7 @@ COMMANDES = {
     "parot invation": "PARROT",
     "rick roll": "rick",
     "kiss": "kiss",
-    "shrek": "shrek"
+    "shrek": "shrek",
 }
 TERMINAUX_LINUX = [
     ["gnome-terminal", "--"],
@@ -87,9 +87,7 @@ class RoueApp:
         n = len(EVENEMENTS)
         self.poids = POIDS if POIDS else [1] * n
         if len(self.poids) != n:
-            raise ValueError(
-                "POIDS doit avoir la même longueur que EVENEMENTS"
-            )
+            raise ValueError("POIDS doit avoir la même longueur que EVENEMENTS")
 
         # --- Interface ---
         self.canvas = tk.Canvas(
@@ -206,9 +204,7 @@ class RoueApp:
         # 2. Calculer l'angle final pour arrêter le secteur sous la flèche.
         # Le secteur i est dessiné de (angle + i*sect) à (angle + (i+1)*sect)
         # Le milieu du secteur gagnant doit tomber à 90 degrés.
-        milieu_secteur = (
-            index_gagnant * angle_par_secteur + angle_par_secteur / 2
-        )
+        milieu_secteur = index_gagnant * angle_par_secteur + angle_par_secteur / 2
         tours_supplementaires = (
             random.randint(4, 7) * 360
         )  # plusieurs tours pour l'effet
@@ -284,7 +280,6 @@ class RoueApp:
     def executer_commande(self, resultat):
         """Lance la commande associée au résultat sans bloquer l'interface."""
         commande = COMMANDES.get(resultat)
-        commande = "shrek"
         if not commande:
             return
         if commande == "PARROT":
@@ -327,4 +322,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = RoueApp(root)
     root.mainloop()
- 
