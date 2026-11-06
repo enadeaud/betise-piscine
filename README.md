@@ -53,8 +53,9 @@ app/
 ```
 
 Le projet sépare le point d'entrée, l'interface graphique et les effets système.
-Le fichier `shrek.png` utilisé par la fenêtre doit rester accessible depuis la
-racine du projet.
+
+Les événements de la roue sont simplement de petits malus gentils et
+inoffensifs.
 
 ## Commandes utiles
 
